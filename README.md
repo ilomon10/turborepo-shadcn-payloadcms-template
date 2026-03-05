@@ -1,4 +1,4 @@
-# Valelab
+# Turborepo Shadcn PayloadCMS Template
 
 This Turborepo starter is maintained by the Turborepo core team.
 

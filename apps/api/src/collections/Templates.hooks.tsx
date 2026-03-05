@@ -5,11 +5,11 @@ import slugify from 'slugify'
 import { createOrUpdateTags } from './Tags.hooks'
 
 export const beforeOperationHook: CollectionBeforeOperationHook = async (props) => {
-  const { operation, args } = props
-  const data = args.data as Partial<Template>
+  const { operation, req } = props
+  const data = req.data as Partial<Template>
   if (['create'].indexOf(operation) > -1) {
     if (!data.slug) {
-      args.data.slug = slugify(`${args.data.title} ${generateId(4)}`, { lower: true })
+      data.slug = slugify(`${data.title} ${generateId(4)}`, { lower: true })
     }
   }
   if (['create', 'update'].indexOf(operation) > -1) {
@@ -17,5 +17,4 @@ export const beforeOperationHook: CollectionBeforeOperationHook = async (props) 
       data.tags = await createOrUpdateTags(props.req.payload, data.tags)
     }
   }
-  return args
 }

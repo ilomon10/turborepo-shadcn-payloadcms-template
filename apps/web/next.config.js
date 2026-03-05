@@ -2,7 +2,7 @@
 const nextConfig = {
   output: "standalone",
   async rewrites() {
-    const server = process.env.SERVER_URL;
+    const server = process.env.SERVER_URL || "http://localhost:3001/api";
 
     const apiProxy = {
       source: "/api/:path*",
