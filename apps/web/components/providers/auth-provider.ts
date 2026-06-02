@@ -62,7 +62,7 @@ export const authProvider = (): AuthProvider => {
                 password: params.password,
               },
             },
-            { credentials: "include" }
+            { credentials: "include" },
           )) as LoginResult;
           if (res.errors) {
             result.success = false;
@@ -90,10 +90,27 @@ export const authProvider = (): AuthProvider => {
       };
 
       try {
-        // No token -> not authenticated
-        if (!token) {
-          result.redirectTo = "/login";
-          return result;
+        // If no token in localStorage, try to check the session via /me
+        // Payload will send the HttpOnly cookie automatically if credentials: 'include' is set.
+        if (!token || !tokenExpireDate) {
+          try {
+            const meRes = await client.me(
+              { collection: "users" },
+              { credentials: "include" },
+            );
+            if (meRes?.user) {
+              result.authenticated = true;
+              return result;
+            } else {
+              result.authenticated = false;
+              result.redirectTo = "/login";
+              return result;
+            }
+          } catch (e) {
+            result.authenticated = false;
+            result.redirectTo = "/login";
+            return result;
+          }
         }
 
         const nowSec = Math.floor(Date.now() / 1000);
@@ -172,6 +189,7 @@ export const authProvider = (): AuthProvider => {
             {
               collection: "users",
               data: {
+                collection: "users",
                 email: params.email,
                 username: params.username,
                 password: params.password,
@@ -180,7 +198,7 @@ export const authProvider = (): AuthProvider => {
             },
             {
               credentials: "include",
-            }
+            },
           );
           if (typeof res !== "undefined") {
             result.success = true;
@@ -219,7 +237,7 @@ export const authProvider = (): AuthProvider => {
         {
           // headers: { Authorization: `JWT ${token}` },
           credentials: "include",
-        }
+        },
       );
       return res.user;
     },

@@ -19,7 +19,7 @@ services:
       dockerfile: ./apps/api/Dockerfile
     restart: always
     environment:
-      - POSTGRES_URI=postgres://postgres:changeme@db/valelab-db
+      - POSTGRES_URI=postgres://postgres:changeme@db/example-db
       - POSTGRES_PUSH=false
       - PAYLOAD_SECRET=YOUR_SECRET_HERE
       - SERVER_URL=localhost:3001

@@ -27,7 +27,7 @@ export default function AuthRouteLayout({
   const activeAuthProvider = useActiveAuthProvider();
   const hasAuthProvider = Boolean(activeAuthProvider?.isProvided);
   const parsed = useParsed();
-  // const go = useGo();
+  const go = useGo();
 
   const {
     isLoading,
@@ -54,30 +54,26 @@ export default function AuthRouteLayout({
   const appliedRedirect =
     typeof redirectOnFail === "string"
       ? redirectOnFail
-      : (authenticatedRedirect as string | undefined);
+      : (authenticatedRedirect as string | undefined) || "/login";
 
   const pathname = `${parsed.pathname}`.replace(/(\?.*|#.*)$/, "");
 
-  if (appliedRedirect) {
-    // Prevent redirect loop: only redirect to login if not already there
-    if (pathname !== "/login") {
-      return (
-        <Redirect
-          config={{
-            to: "/login",
-            query: {
-              to: pathname,
-            },
-            type: "replace",
-          }}
-        />
-      );
-    } else {
-      // Already at login, don't redirect again
-      return null;
+  // Handle redirection client-side if not authenticated
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated && pathname !== "/login") {
+      go({
+        to: appliedRedirect,
+        query: { to: pathname },
+        type: "replace",
+      });
     }
+  }, [isLoading, isAuthenticated, pathname, appliedRedirect, go]);
+
+  if (!isAuthenticated) {
+    return null; // Or a smaller loading spinner while redirecting
   }
-  return null;
+
+  return <UserContextProvider>{children}</UserContextProvider>;
 }
 
 const Redirect = ({ config }: { config: GoConfig }) => {
